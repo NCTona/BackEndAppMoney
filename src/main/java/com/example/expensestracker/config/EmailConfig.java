@@ -14,8 +14,8 @@ public class EmailConfig {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
         mailSender.setHost("smtp.gmail.com");
         mailSender.setPort(587);
-        mailSender.setUsername("kynguyen29032003@gmail.com");  // Địa chỉ email của bạn
-        mailSender.setPassword("aiuz nqeo ysqh pjjq");  // Mật khẩu của email (hoặc mật khẩu ứng dụng)
+        mailSender.setUsername("mnbtnbnk2k3@gmail.com");  // Địa chỉ email của bạn
+        mailSender.setPassword("ciju hqoo aikh imwb");  // Mật khẩu của email (hoặc mật khẩu ứng dụng)
 
         Properties props = mailSender.getJavaMailProperties();
         props.put("mail.smtp.auth", "true");
