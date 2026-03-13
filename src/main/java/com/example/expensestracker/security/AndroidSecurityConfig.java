@@ -39,7 +39,8 @@ public class AndroidSecurityConfig {
                                                                         String.format("%s/users/send-otp", apiPrefix),
                                                                         String.format("%s/users/verify-otp", apiPrefix),
                                                                         String.format("%s/users/reset-password",
-                                                                                        apiPrefix))
+                                                                                        apiPrefix),
+                                                                        String.format("%s/internal/**", apiPrefix))
                                                         .permitAll()
                                                         .anyRequest().authenticated();
                                 })
