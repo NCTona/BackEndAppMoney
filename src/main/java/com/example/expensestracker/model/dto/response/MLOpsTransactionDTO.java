@@ -33,6 +33,9 @@ public class MLOpsTransactionDTO {
     @JsonProperty("note")
     private String note;
 
+    @JsonProperty("type")
+    private String type;
+
     public static MLOpsTransactionDTO fromEntity(TransactionEntity entity) {
         return MLOpsTransactionDTO.builder()
                 .transactionId(entity.getTransactionId())
@@ -41,6 +44,9 @@ public class MLOpsTransactionDTO {
                 .amount(entity.getAmount())
                 .date(entity.getTransactionDate())
                 .note(entity.getNote())
+                .type(entity.getCategory() != null && entity.getCategory().getType() != null
+                        ? entity.getCategory().getType().name().toLowerCase()
+                        : "unknown")
                 .build();
     }
 }

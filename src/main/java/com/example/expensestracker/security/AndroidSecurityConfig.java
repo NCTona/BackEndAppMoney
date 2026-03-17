@@ -42,6 +42,9 @@ public class AndroidSecurityConfig {
                                                                                         apiPrefix),
                                                                         String.format("%s/internal/**", apiPrefix))
                                                         .permitAll()
+                                                        // Require JWT for forecast endpoints that mobile app hits
+                                                        .requestMatchers(String.format("%s/forecast/**", apiPrefix))
+                                                        .authenticated()
                                                         .anyRequest().authenticated();
                                 })
                                 .headers(headers -> headers
