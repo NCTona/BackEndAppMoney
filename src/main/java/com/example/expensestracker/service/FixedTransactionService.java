@@ -34,38 +34,42 @@ public class FixedTransactionService implements IFixedTransactionService {
 
     @Transactional
     @Override
-    public FixedTransactionEntity createFixedTransaction(FixedTransactionDTO fixedTransactionDTO, Long userId) throws Exception {
+    public FixedTransactionEntity createFixedTransaction(FixedTransactionDTO fixedTransactionDTO, Long userId)
+            throws Exception {
         // 1. Lưu giao dịch cố định
-        if(fixedTransactionDTO.getAmount().compareTo(BigDecimal.ZERO)<=0){
+        if (fixedTransactionDTO.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
             throw new Exception("Số tiền không hợp lệ");
         }
-            CategoryEntity existingCategory = categoryRepository
-                    .findById(fixedTransactionDTO.getCategoryId())
-                    .orElseThrow(() -> new DataNotFoundException(
-                            "Không tìm thấy danh mục có id: " + fixedTransactionDTO.getCategoryId()));
-            UserEntity existingUser = userRepository
-                    .findById(userId)
-                    .orElseThrow(() -> new DataNotFoundException(
-                            "Không tìm thấy danh mục có id: " + userId));
-            FixedTransactionEntity fixedTransactionEntity = FixedTransactionEntity.builder()
-                    .user(existingUser)
-                    .category(existingCategory)
-                    .title(fixedTransactionDTO.getTitle())
-                    .amount(fixedTransactionDTO.getAmount())
-                    .repeatFrequency(RepeatFrequency.valueOf(fixedTransactionDTO.getRepeatFrequency()))
-                    .startDate(fixedTransactionDTO.getStartDate())
-                    .endDate(fixedTransactionDTO.getEndDate())
-                    .build();
+        CategoryEntity existingCategory = categoryRepository
+                .findById(fixedTransactionDTO.getCategoryId())
+                .orElseThrow(() -> new DataNotFoundException(
+                        "Không tìm thấy danh mục có id: " + fixedTransactionDTO.getCategoryId()));
+        UserEntity existingUser = userRepository
+                .findById(userId)
+                .orElseThrow(() -> new DataNotFoundException(
+                        "Không tìm thấy danh mục có id: " + userId));
+        FixedTransactionEntity fixedTransactionEntity = FixedTransactionEntity.builder()
+                .user(existingUser)
+                .category(existingCategory)
+                .title(fixedTransactionDTO.getTitle())
+                .amount(fixedTransactionDTO.getAmount())
+                .repeatFrequency(RepeatFrequency.valueOf(fixedTransactionDTO.getRepeatFrequency()))
+                .startDate(fixedTransactionDTO.getStartDate())
+                .endDate(fixedTransactionDTO.getEndDate())
+                .build();
         FixedTransactionEntity savedFixedTransaction = fixedTransactionRepository.save(fixedTransactionEntity);
-            // 2. Xử lý tạo giao dịch cho các ngày trong quá khứ
-            generateTransactionsForPastDates(fixedTransactionEntity);
+        // 2. Xử lý tạo giao dịch cho các ngày trong quá khứ
+        generateTransactionsForPastDates(fixedTransactionEntity);
         return savedFixedTransaction;
 
     }
+
     @Transactional
     @Override
-    public FixedTransactionEntity updateFixedTransaction(Long fixedTransactionId,Long userId, FixedTransactionDTO fixedtransactionDTO) throws Exception {
-        FixedTransactionEntity fixedTransaction = fixedTransactionRepository.findByFixedTransactionIdAndUserId(fixedTransactionId,userId)
+    public FixedTransactionEntity updateFixedTransaction(Long fixedTransactionId, Long userId,
+            FixedTransactionDTO fixedtransactionDTO) throws Exception {
+        FixedTransactionEntity fixedTransaction = fixedTransactionRepository
+                .findByFixedTransactionIdAndUserId(fixedTransactionId, userId)
                 .orElseThrow(() -> new DataNotFoundException("Giao dịch không tồn tại"));
         CategoryEntity existingCategory = categoryRepository
                 .findById(fixedtransactionDTO.getCategoryId())
@@ -87,8 +91,7 @@ public class FixedTransactionService implements IFixedTransactionService {
                 fixedTransaction.getUser().getUserId(),
                 fixedTransaction.getFixedTransactionId(),
                 oldStartDate,
-                LocalDate.now()
-        );
+                LocalDate.now());
         // 4. Tạo lại giao dịch thực tế từ thông tin mới
         generateTransactionsForPastDates(fixedTransaction);
 
@@ -98,18 +101,21 @@ public class FixedTransactionService implements IFixedTransactionService {
     @Transactional
     @Override
     public void deleteFixedTransaction(Long fixedTransactionId, Long userId) throws Exception {
-        FixedTransactionEntity fixedTransaction = fixedTransactionRepository.findByFixedTransactionIdAndUserId(fixedTransactionId,userId)
+        FixedTransactionEntity fixedTransaction = fixedTransactionRepository
+                .findByFixedTransactionIdAndUserId(fixedTransactionId, userId)
                 .orElseThrow(() -> new DataNotFoundException("Không thể xóa giao dịch"));
 
         fixedTransactionRepository.delete(fixedTransaction);
     }
+
     @Override
     public List<FixedTransactionResponse> getFixedTransaction(Long userId) {
-        List<FixedTransactionEntity> fixedTransactions =  fixedTransactionRepository.findByUserId(userId);
+        List<FixedTransactionEntity> fixedTransactions = fixedTransactionRepository.findByUserId(userId);
         return fixedTransactions.stream()
                 .map(FixedTransactionResponse::fromEntity)
                 .collect(Collectors.toList());
     }
+
     private void generateTransactionsForPastDates(FixedTransactionEntity fixedTransaction) {
         LocalDate today = LocalDate.now();
         LocalDate startDate = fixedTransaction.getStartDate();
@@ -120,9 +126,9 @@ public class FixedTransactionService implements IFixedTransactionService {
         UserEntity user = fixedTransaction.getUser();
         CategoryEntity category = fixedTransaction.getCategory();
 
-
         while (!startDate.isAfter(loopEndDate)) {
-            if (!transactionExists(user.getUserId(), startDate, category.getCategoryId(), fixedTransaction.getFixedTransactionId())) {
+            if (!transactionExists(user.getUserId(), startDate, category.getCategoryId(),
+                    fixedTransaction.getFixedTransactionId())) {
                 TransactionEntity transaction = TransactionEntity.builder()
                         .user(user)
                         .category(category)
@@ -137,22 +143,31 @@ public class FixedTransactionService implements IFixedTransactionService {
         }
     }
 
-    private boolean transactionExists(Long userId, LocalDate date, Long categoryId,Long fixTransactionId) {
+    private boolean transactionExists(Long userId, LocalDate date, Long categoryId, Long fixTransactionId) {
         // Kiểm tra xem giao dịch đã tồn tại chưa
-        return transactionRepository.existsByUserIdAndTransactionDateAndCategoryIdAAndFixedTransactionId(userId, date, categoryId,fixTransactionId);
+        return transactionRepository.existsByUserIdAndTransactionDateAndCategoryIdAAndFixedTransactionId(userId, date,
+                categoryId, fixTransactionId);
     }
+
     public void generateTransactionsForToday() {
         LocalDate today = LocalDate.now();
 
         List<FixedTransactionEntity> fixedTransactions = fixedTransactionRepository.findAll();
 
         for (FixedTransactionEntity fixedTransaction : fixedTransactions) {
-            // Kiểm tra ngày hợp lệ: today phải nằm trong khoảng [startDate, endDate]
+            // Kiem tra ngay hop le: today phai nam trong khoang [startDate, endDate]
             if ((fixedTransaction.getStartDate().isBefore(today) || fixedTransaction.getStartDate().isEqual(today)) &&
-                    (fixedTransaction.getEndDate() == null || fixedTransaction.getEndDate().isAfter(today) || fixedTransaction.getEndDate().isEqual(today))) {
+                    (fixedTransaction.getEndDate() == null || fixedTransaction.getEndDate().isAfter(today)
+                            || fixedTransaction.getEndDate().isEqual(today))) {
 
-                // Kiểm tra xem giao dịch đã tồn tại hay chưa
-                if (!transactionExists(fixedTransaction.getUser().getUserId(), today, fixedTransaction.getCategory().getCategoryId(), fixedTransaction.getFixedTransactionId())) {
+                // Kiem tra hom nay co dung ngay lap lai theo frequency khong
+                if (!isScheduledDate(fixedTransaction, today)) {
+                    continue; // Hom nay khong phai ngay lap lai -> bo qua
+                }
+
+                // Kiem tra xem giao dich da ton tai hay chua
+                if (!transactionExists(fixedTransaction.getUser().getUserId(), today,
+                        fixedTransaction.getCategory().getCategoryId(), fixedTransaction.getFixedTransactionId())) {
                     TransactionEntity transaction = TransactionEntity.builder()
                             .user(fixedTransaction.getUser())
                             .category(fixedTransaction.getCategory())
@@ -165,6 +180,23 @@ public class FixedTransactionService implements IFixedTransactionService {
                 }
             }
         }
+    }
+
+    /**
+     * Kiem tra hom nay co phai la ngay lap lai hop le hay khong.
+     * Duyet tu startDate theo frequency de xem co trung voi targetDate khong.
+     */
+    private boolean isScheduledDate(FixedTransactionEntity fixedTransaction, LocalDate targetDate) {
+        LocalDate scheduledDate = fixedTransaction.getStartDate();
+        String frequency = fixedTransaction.getRepeatFrequency().getRepeatFrequency();
+
+        while (!scheduledDate.isAfter(targetDate)) {
+            if (scheduledDate.isEqual(targetDate)) {
+                return true;
+            }
+            scheduledDate = getNextDate(frequency, scheduledDate);
+        }
+        return false;
     }
 
     private LocalDate getNextDate(String frequency, LocalDate currentDate) {

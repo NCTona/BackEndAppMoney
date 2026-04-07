@@ -35,3 +35,6 @@ build/
 
 ### Security ###
 .env
+
+### Build output ###
+bin/

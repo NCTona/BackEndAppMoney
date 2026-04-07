@@ -18,15 +18,21 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Service tổng hợp dữ liệu chi tiêu tuần để phục vụ dự báo chi tiêu.
- * Cung cấp dữ liệu đầu vào (input_weeks) cho model TFLite trên thiết bị di
- * động.
+ * Service tong hop du lieu chi tieu AN UONG theo tuan de phuc vu du bao.
+ * Cung cap du lieu dau vao (input_weeks) cho model TFLite tren thiet bi di dong.
+ *
+ * LSTM chi train tren category An uong (categoryId=2) vi:
+ * - Cac category khac co chi tieu dot ngot, bat thuong -> LSTM khong on dinh
+ * - An uong co tan suat deu, amount on dinh -> phu hop voi LSTM forecasting
  */
 @Service
 @RequiredArgsConstructor
 @Slf4j
 @SuppressWarnings({ "null", "unchecked" })
 public class WeeklyForecastService {
+
+    // Category An uong - dong bo voi LSTM_FOOD_CATEGORY_ID trong MLOps config
+    private static final Long FOOD_CATEGORY_ID = 2L;
 
     private final TransactionRepository transactionRepository;
     private final CategoryLimitRepository categoryLimitRepository;
@@ -37,10 +43,12 @@ public class WeeklyForecastService {
         LocalDate now = LocalDate.now();
         LocalDate startDate = now.minusDays(27); // 28 ngày (bao gồm hôm nay)
 
+        // Chi lay category An uong (dong bo voi LSTM model chi train tren food data)
         List<TransactionEntity> transactions = transactionRepository
                 .findByUserIdAndDateBetween(userId, startDate, now)
                 .stream()
                 .filter(t -> t.getCategory().getType().name().equalsIgnoreCase("EXPENSE"))
+                .filter(t -> t.getCategory().getCategoryId().equals(FOOD_CATEGORY_ID))
                 .collect(Collectors.toList());
 
         // Tổng hợp theo ngày
@@ -67,16 +75,20 @@ public class WeeklyForecastService {
         double avgWeekly = weeklySpending.stream().mapToDouble(Double::doubleValue).average().orElse(0);
         double predictedRemaining = (avgWeekly / 7) * remainingDays;
 
-        // Tính tổng ngân sách (total budget) và đã chi (spent) trong tháng hiện tại
+        // Tinh ngan sach va da chi CHI cho category An uong
         List<CategoryLimitEntity> limits = categoryLimitRepository.findByUserIdAndMonthAndYear(
                 userId, now.getMonthValue(), now.getYear());
-        double totalBudget = limits.stream().mapToDouble(l -> l.getLimitExpense().doubleValue()).sum();
+        double totalBudget = limits.stream()
+                .filter(l -> l.getCategory().getCategoryId().equals(FOOD_CATEGORY_ID))
+                .mapToDouble(l -> l.getLimitExpense().doubleValue())
+                .sum();
 
-        // Lấy chi tiêu đã tiêu tháng này
+        // Lay chi tieu An uong da tieu thang nay
         List<TransactionEntity> currentMonthTx = transactionRepository.findByUserIdAndDateBetween(
                 userId, now.withDayOfMonth(1), now);
         double totalSpent = currentMonthTx.stream()
                 .filter(t -> t.getCategory().getType().name().equalsIgnoreCase("EXPENSE"))
+                .filter(t -> t.getCategory().getCategoryId().equals(FOOD_CATEGORY_ID))
                 .mapToDouble(t -> t.getAmount().doubleValue())
                 .sum();
 

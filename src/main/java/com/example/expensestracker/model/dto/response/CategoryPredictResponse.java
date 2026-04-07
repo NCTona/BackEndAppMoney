@@ -4,7 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 /**
- * Response từ FastAPI LightGBM prediction server.
+ * Response tu FastAPI LightGBM prediction server.
+ * Du doan tong chi tieu cuoi thang va canh bao ngan sach.
  */
 @Getter
 @Setter
@@ -12,8 +13,6 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 public class CategoryPredictResponse {
-    @JsonProperty("user_id")
-    private Long userId;
 
     @JsonProperty("category_id")
     private Long categoryId;
@@ -21,24 +20,22 @@ public class CategoryPredictResponse {
     @JsonProperty("predicted_spending")
     private double predictedSpending;
 
-    @JsonProperty("current_spending")
-    private double currentSpending;
+    @JsonProperty("current_spent")
+    private double currentSpent;
 
-    private String trend;
+    private double budget;
 
-    @JsonProperty("change_percent")
-    private double changePercent;
+    @JsonProperty("budget_used_pct")
+    private double budgetUsedPct;
 
-    // Các trường phân bổ ngân sách (AI đề xuất)
-    @JsonProperty("budget_limit")
-    private double budgetLimit;
+    @JsonProperty("forecast_usage_pct")
+    private double forecastUsagePct;
 
-    @JsonProperty("is_essential")
-    private boolean essential;
+    /** safe | warning | over_budget | no_budget */
+    private String status;
 
-    @JsonProperty("recommended_daily_allocation")
-    private double recommendedDailyAllocation;
+    private String suggestion;
 
-    @JsonProperty("reason")
-    private String reason;
+    @JsonProperty("suggested_daily")
+    private double suggestedDaily;
 }

@@ -7,9 +7,15 @@ import com.example.expensestracker.model.entity.FixedTransactionEntity;
 import java.util.List;
 
 public interface IFixedTransactionService {
-    public FixedTransactionEntity createFixedTransaction(FixedTransactionDTO fixedTransactionDTO, Long userId) throws Exception;
-    public FixedTransactionEntity updateFixedTransaction(Long fixedTransactionId, Long userId, FixedTransactionDTO fixedTransactionDTO) throws Exception;
+    public FixedTransactionEntity createFixedTransaction(FixedTransactionDTO fixedTransactionDTO, Long userId)
+            throws Exception;
+
+    public FixedTransactionEntity updateFixedTransaction(Long fixedTransactionId, Long userId,
+            FixedTransactionDTO fixedTransactionDTO) throws Exception;
+
     public void deleteFixedTransaction(Long fixedTransactionId, Long userId) throws Exception;
+
     public List<FixedTransactionResponse> getFixedTransaction(Long userId);
+
     public void generateTransactionsForToday();
 }

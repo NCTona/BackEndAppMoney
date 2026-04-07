@@ -45,8 +45,7 @@ public class CategoryForecastController {
 
             // Gọi 4 service
             AISummaryResponse.WeeklyForecast weeklyForecast = weeklyForecastService.predictNextWeek(userId);
-            List<CategoryPredictResponse> categoryForecasts = categoryForecastService.predictAllCategories(userId,
-                    false); // Không normalize để đồng bộ với Xu hướng chi tiêu
+            List<CategoryPredictResponse> categoryForecasts = categoryForecastService.predictAllCategories(userId);
             List<AnomalyResponse> anomalies = anomalyDetectionService.checkRecentTransactions(userId);
             List<SpendingPatternResponse> alerts = spendingPatternService.getUpcomingAlerts(userId);
 
@@ -72,19 +71,17 @@ public class CategoryForecastController {
 
     /**
      * GET /api/forecast/categories
-     * Dự đoán chi tiêu tháng tiếp theo cho TẤT CẢ danh mục chi tiêu của user.
+     * Du doan chi tieu cuoi thang hien tai cho TAT CA danh muc cua user.
      */
     @GetMapping("/categories")
     public ResponseEntity<?> predictAllCategories(
-            @AuthenticationPrincipal UserEntity user,
-            @RequestParam(name = "normalized", defaultValue = "false") boolean normalized) {
+            @AuthenticationPrincipal UserEntity user) {
         try {
-            List<CategoryPredictResponse> predictions = categoryForecastService.predictAllCategories(user.getUserId(),
-                    normalized);
+            List<CategoryPredictResponse> predictions = categoryForecastService.predictAllCategories(user.getUserId());
             return ResponseEntity.ok(predictions);
         } catch (Exception e) {
             return ResponseEntity.internalServerError()
-                    .body(new ApiResponse("error", "Lỗi dự đoán: " + e.getMessage()));
+                    .body(new ApiResponse("error", "Loi du doan: " + e.getMessage()));
         }
     }
 

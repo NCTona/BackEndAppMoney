@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 /**
- * Request body gửi đến FastAPI LightGBM prediction server.
- * Không dùng userId làm feature — thay bằng behavioral features.
+ * Request body gui den FastAPI LightGBM prediction server.
+ * Du doan tong chi tieu cuoi thang hien tai dua tren chi tieu dang dien ra.
  */
 @Getter
 @Setter
@@ -17,45 +17,24 @@ public class CategoryPredictRequest {
     @JsonProperty("category_id")
     private Long categoryId;
 
-    private int month;
-    private int year;
+    @JsonProperty("days_passed")
+    private int daysPassed;
 
-    @JsonProperty("monthly_spending")
-    private double monthlySpending;
+    @JsonProperty("days_remaining")
+    private int daysRemaining;
 
-    @JsonProperty("transaction_count")
-    private int transactionCount;
+    @JsonProperty("current_spent")
+    private double currentSpent;
 
-    @JsonProperty("avg_transaction")
-    private double avgTransaction;
+    @JsonProperty("current_tx_count")
+    private int currentTxCount;
 
-    @JsonProperty("max_transaction")
-    private double maxTransaction;
-
-    @JsonProperty("avg_day_of_week")
-    private double avgDayOfWeek;
-
-    @JsonProperty("avg_day_of_month")
-    private double avgDayOfMonth;
-
-    @JsonProperty("total_all_categories")
-    private double totalAllCategories;
+    @JsonProperty("daily_rate")
+    private double dailyRate;
 
     @JsonProperty("category_ratio")
     private double categoryRatio;
 
-    @JsonProperty("prev_month_spending")
-    private double prevMonthSpending;
-
-    @JsonProperty("prev_month_count")
-    private int prevMonthCount;
-
-    @JsonProperty("prev_month_ratio")
-    private double prevMonthRatio;
-
-    @JsonProperty("avg_monthly_spending_3m")
-    private double avgMonthlySpending3m;
-
-    @JsonProperty("spending_trend")
-    private double spendingTrend;
+    /** Ngan sach phan bo cho category (chi dung post-processing, khong la feature). */
+    private double budget;
 }

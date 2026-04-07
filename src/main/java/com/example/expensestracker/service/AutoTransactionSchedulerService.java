@@ -13,6 +13,7 @@ public class AutoTransactionSchedulerService {
     private IFixedTransactionService fixedTransactionService;
     @Autowired
     private UserRepository userRepository;
+
     /**
      * Scheduler chạy mỗi ngày lúc 00:00 để tạo giao dịch tự động.
      */
@@ -26,7 +27,8 @@ public class AutoTransactionSchedulerService {
             e.printStackTrace();
         }
     }
-     //Gọi tự động sao chép giới hạn khi ứng dụng bắt đầu
+
+    // Gọi tự động sao chép giới hạn khi ứng dụng bắt đầu
     @PostConstruct
     public void init() {
         fixedTransactionService.generateTransactionsForToday();
